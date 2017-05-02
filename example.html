@@ -1,0 +1,53 @@
+<html>
+<head>
+<script src="node_modules/d3/build/d3.js"></script>
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="BigScatterplot.js"></script>
+
+<script>
+
+function pageLoad(){
+    d3.csv("baseball_proj.csv", function(data){
+
+        let tooltip = d3.select("body").append("div")
+                .attr("id","tooltip")
+                .style("width", 100 + "px")
+                .style("height", 25 + "px")
+                .style("background-color", "#fff")
+                .style("position", "fixed")
+                .style("visibility", "hidden")
+                .style("border", "2px solid gray")
+                .style("border-radius", "5px");
+
+        let onHover = function(node){
+            if (node){
+                let coordinates = [d3.event.pageX, d3.event.pageY]; 
+                tooltip.style("left", (coordinates[0] + 10) + "px")
+                    .style("top", (coordinates[1] + 10) + "px")
+                    .style("visibility","visible");
+
+                tooltip.selectAll("*").remove()
+                tooltip.html("ID: " + node.id);
+            }else{
+                tooltip.style("visibility", "hidden")
+            }
+        }
+
+        let onSelect = function(data){console.log(data)}
+
+        // loading data
+        data.forEach(function(d,i){ d['id'] = i; d['x'] = +d['x']; d['y'] = +d['y']; });  
+
+        // creating scatterplot
+        s = new BigScatterplot("#div-scatter", data, (d)=>d.x, (d)=>d.y, (d)=> (Math.abs(d.x)**0.5 + Math.abs(d.y)**0.5)**2 < 30, 
+            d3.scaleOrdinal(d3.schemeCategory10), onHover, onSelect,
+            viewport={width:1000, height:1000});
+    });
+}
+</script>
+
+</head>
+<body onload="pageLoad()">
+    <div id="div-scatter"></div>
+</body>
+</html>
